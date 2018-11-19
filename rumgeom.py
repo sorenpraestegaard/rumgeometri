@@ -67,8 +67,12 @@ class Line():
         '''
         if not isinstance(t, (float, int)):
             raise TypeError('Parameter is not a valid number')
-        return
+        p = Vector.fromPoint(self.p0)
+        s = scale(t, self.d)
+        return add(p,s)
 
+    def __str__(self):
+        return "(x,y,z) = ({}, {}, {}) + t*({}, {}, {})".format(self.p0.x, self.p0.y, self.p0.z, self.d.x, self.d.y, self.d.z)
 
 class Plane():
     '''
@@ -146,9 +150,13 @@ class Plane():
 
     def point(self, t: (float,int) = 0, s: (float, int) = 0) -> Vector:
         '''
-        Return a point on the line, from a given parameter
+        Returns a point on the plane, from two given parameters
         '''
-        return None #np.add(np.add(self.p0, np.multiply(t, self.d1)), np.multiply(s, self.d2))
+        p = Vector.fromPoint(self.p0)
+        s1 = scale(t, self.d1)
+        s2 = scale(s, self.d2)
+        return
+        return add(add(p,s1), s2)
 
 
 
@@ -179,6 +187,12 @@ def cross(v1: Vector, v2: Vector) -> Vector:
     z = v1.x * v2.y - v1.y * v2.x
     return Vector(x,y,z)
 
+def add(v1: Vector, v2: Vector) -> Vector:
+    '''
+    Adds the two vectors v1 and v2, and returns their sum
+    '''
+    return Vector(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z)
+
 
 def dot(v1: Vector, v2: Vector) -> float:
     '''
@@ -194,20 +208,64 @@ def angle(v1: Vector, v2: Vector) -> float:
     '''
     return math.degrees(math.acos(dot(v1,v2)/(v1.length()*v2.length())))
 
+def distancePointPlane(p: Point, a: Plane) -> float:
+    #The distance between the point and the plane is
+    # the absolute value of the dot product between
+    # the unit normal vector of the plane, and the projection
+    # of a vector connecting the point to the plane, onto that unit
+    # normal vectors
+    return math.fabs(dot(a.normal(), Vector.connect(p.x, p.y, p.z, a.p0.x, a.p0.y, a.p0.z)))
 
 def intersect(l: Line, p: Plane) -> Point:
     '''
     Calculates the intersection between a Line and a Plane.
     Returns None if the two arguments are parallel.
     '''
-    return None
+    if math.isclose(dot(l.d,p.normal()), 0):
+        #If the line direction is perpendicular to the plane normal,
+        # the line and plane must be parallel.
+        return None
+    else:
+        #There exists a parameter t, which makes
+        # p.isInPlane(l.point(t)) == 0
+        #Let's find it.
+        #Initial guess
+        t = 5
+        step = 0.1
+        done = p.isInPlane(l.point(t))
+        c = 0
+        while not done:
+            d = distancePointPlane(l.point(t), p)
+            delta = d - distancePointPlane(l.point(t + step), p)
+            if delta > 0:
+                #We are going the right way!
+                pass
+            else:
+                #Turn around
+                step *= -1
+            if math.fabs(delta) > math.fabs(l.d.length()*step):
+                step += 0.1*d
+            else:
+                step += 0.1*d
+            t += step
+            c += 1
+            #print(c,t, step, d)
 
-l = Line.createNew(0,0,0,1,2,3)
-p = Plane.createNew(1,0,0,0,1,0,0,0,1)
+            done = p.isInPlane(l.point(t)) or d < 0.00001
+            if c > 10000:
+                done = True
+        return l.point(t)
+
+l = Line.createNew(-10,-10,-10,1,2,3)
+p = Plane.createNew(1,4,67,0,1,0,0,0,1)
 print(p.point(1,3))
-print(intersect(l,p))
 v1 = Vector(1,0,0)
 v2 = Vector(0,1,0)
 print(p.normal())
 print(p.isInPlane(Point(0,1,0)))
 print(angle(Vector(1,0,0), Vector(1,-1,1)))
+pip = intersect(l, p)
+print("Intersect siger at {} ligger i planen.".format(pip))
+print(distancePointPlane(pip, p))
+print(p.isInPlane(pip))
+print(p.isInPlane(Vector(1,12,23)))
