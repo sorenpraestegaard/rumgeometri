@@ -93,6 +93,7 @@ class Plane():
         Returns a plane through the three points
         (x1,y1,z1), (x2,y2,z2) and (x3,y3,z3)
 
+
     normal()
         Returns a normal vector to the plane.
         The normal will be a unit vector.
