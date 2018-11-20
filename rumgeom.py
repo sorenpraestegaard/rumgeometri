@@ -250,11 +250,7 @@ def intersect(l: Line, p: Plane) -> Point:
 
 l = Line.createNew(-10,-10,-10,1,2,3)
 p = Plane.createNew(1,4,67,1,2,2,-1,2,1)
-print(angle(l.d, p.normal()))
-print(l)
-print(p)
 pip = intersect(l, p)
 print("Intersect siger at {} ligger i planen.".format(pip))
-print(l.point(61))
 print(distancePointPlane(pip, p))
 print(p.isInPlane(pip))
