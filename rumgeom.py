@@ -143,10 +143,8 @@ class Plane():
         and False otherwise.
         '''
         #Testing for zero is done with math.isclose, to avoid rounding/floating point errors.
-        if math.isclose(math.fabs(dot(self.normal(), Vector.fromPoint(p))),0):
-            return True
-        else:
-            return False
+        #Since we are testing near zero, abs_tol is set to 1e-09
+        return math.isclose(math.fabs(dot(self.normal(), Vector.connect(p.x, p.y, p.z, self.p0.x, self.p0.y, self.p0.z))),0, rel_tol=1e-09, abs_tol=1e-09)
 
     def point(self, t: (float,int) = 0, s: (float, int) = 0) -> Vector:
         '''
@@ -157,6 +155,9 @@ class Plane():
         s2 = scale(s, self.d2)
         return
         return add(add(p,s1), s2)
+
+    def __str__(self):
+        return "(x,y,z) = ({}, {}, {}) + t*({}, {}, {}) + s*({}, {}, {})".format(self.p0.x, self.p0.y, self.p0.z, self.d1.x, self.d1.y, self.d1.z, self.d2.x, self.d2.y, self.d2.z)
 
 
 
@@ -230,42 +231,30 @@ def intersect(l: Line, p: Plane) -> Point:
         # p.isInPlane(l.point(t)) == 0
         #Let's find it.
         #Initial guess
-        t = 5
-        step = 0.1
-        done = p.isInPlane(l.point(t))
-        c = 0
-        while not done:
-            d = distancePointPlane(l.point(t), p)
-            delta = d - distancePointPlane(l.point(t + step), p)
-            if delta > 0:
-                #We are going the right way!
-                pass
-            else:
-                #Turn around
-                step *= -1
-            if math.fabs(delta) > math.fabs(l.d.length()*step):
-                step += 0.1*d
-            else:
-                step += 0.1*d
-            t += step
-            c += 1
-            #print(c,t, step, d)
+        t1 = 1
+        p1 = l.point(t1)
+        d1 = distancePointPlane(p1, p)
+        t2 = 2
+        p2 = l.point(t2)
+        d2 = distancePointPlane(p2, p)
 
-            done = p.isInPlane(l.point(t)) or d < 0.00001
-            if c > 10000:
-                done = True
+        #Calculate line through the two points (t,d)
+        a = (d2-d1)/(t2-t1)
+        b = d1 - a*t1
+
+        #Find the t-value where d is zero
+        # 0 = at+b <=> t = -b/a
+        t = -b/a
+        print('parameter: {}'.format(t))
         return l.point(t)
 
 l = Line.createNew(-10,-10,-10,1,2,3)
-p = Plane.createNew(1,4,67,0,1,0,0,0,1)
-print(p.point(1,3))
-v1 = Vector(1,0,0)
-v2 = Vector(0,1,0)
-print(p.normal())
-print(p.isInPlane(Point(0,1,0)))
-print(angle(Vector(1,0,0), Vector(1,-1,1)))
+p = Plane.createNew(1,4,67,1,2,2,-1,2,1)
+print(angle(l.d, p.normal()))
+print(l)
+print(p)
 pip = intersect(l, p)
 print("Intersect siger at {} ligger i planen.".format(pip))
+print(l.point(61))
 print(distancePointPlane(pip, p))
 print(p.isInPlane(pip))
-print(p.isInPlane(Vector(1,12,23)))
