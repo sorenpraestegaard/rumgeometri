@@ -103,6 +103,7 @@ class Plane():
         The normal will be a unit vector.
     '''
 
+
     def __init__(self, p0, d1, d2):
         self.p0 = p0
         self.d1 = d1
