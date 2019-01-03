@@ -50,7 +50,7 @@ class Line():
         '''
         p0 = Vector(x0, y0, z0)
         d = Vector(a,b,c)
-        return Line(p0, d)
+        return cls(p0, d)
 
     @classmethod
     def createTwoPoints(cls,x1,y1,z1,x2,y2,z2):
@@ -59,7 +59,7 @@ class Line():
         '''
         d = Vector(x2-x1, y2-y1, z2-z1)
         p0 = Vector(x1,y1,z1)
-        return Line(p0, d)
+        return cls(p0, d)
 
     def point(self, t: (float,int) = 0) -> Point:
         '''
@@ -249,9 +249,20 @@ def intersect(l: Line, p: Plane) -> Point:
         print('parameter: {}'.format(t))
         return l.point(t)
 
+
+'''
 l = Line.createNew(-10,-10,-10,1,2,3)
 p = Plane.createNew(1,4,67,1,2,2,-1,2,1)
 pip = intersect(l, p)
 print("Intersect siger at {} ligger i planen.".format(pip))
 print(distancePointPlane(pip, p))
 print(p.isInPlane(pip))
+'''
+print(Plane.createNew.__doc__)
+p1 = Point(2,3,-1)
+v1 = Vector.fromPoint(p1)
+v1 = Vector.connect(3,2,1,5,3,-1)
+print(v1.length())
+
+v2 = Vector.fromPoint(Point(4,1,1))
+print(dot(v1,v2))
