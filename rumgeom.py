@@ -71,6 +71,14 @@ class Line():
         s = scale(t, self.d)
         return add(p,s)
 
+    def getXPoint(self, x):
+        '''
+        Returns a point on the line, with the given x-getZCoord
+        '''
+        #Find the correct parameter
+        t = (x-self.p0.x)/self.d.x
+        return self.point(t)
+
     def __str__(self):
         return "(x,y,z) = ({}, {}, {}) + t*({}, {}, {})".format(self.p0.x, self.p0.y, self.p0.z, self.d.x, self.d.y, self.d.z)
 
@@ -147,6 +155,21 @@ class Plane():
         #Since we are testing near zero, abs_tol is set to 1e-09
         return math.isclose(math.fabs(dot(self.normal(), Vector.connect(p.x, p.y, p.z, self.p0.x, self.p0.y, self.p0.z))),0, rel_tol=1e-09, abs_tol=1e-09)
 
+    def listZPoints(self, ts, ss):
+        Z = []
+        for t in ts:
+            for s in ss:
+                Z.append(self.point(t,s).z)
+        return Z
+
+    def getZCoord(self, x, y):
+        '''
+        Returnerer en z-koordinat i planen, givet x og y.
+        '''
+        n = self.normal()
+        z = (-n.x*(x - self.p0.x) - n.y*(y - self.p0.y) + n.z*self.p0.z)/n.z
+        return z
+
     def point(self, t: (float,int) = 0, s: (float, int) = 0) -> Vector:
         '''
         Returns a point on the plane, from two given parameters
@@ -154,7 +177,6 @@ class Plane():
         p = Vector.fromPoint(self.p0)
         s1 = scale(t, self.d1)
         s2 = scale(s, self.d2)
-        return
         return add(add(p,s1), s2)
 
     def __str__(self):
@@ -164,10 +186,11 @@ class Plane():
 
 def scale(s: (float, int), v: Vector) -> Vector:
     '''
-    Returns a version of v scaled by s.
+    Returns a copy of v, scaled by s.
     '''
     return Vector(v.x * s, v.y * s, v.z * s)
 
+ #test
 
 def normalize(v: Vector) -> Vector:
     '''
@@ -248,21 +271,3 @@ def intersect(l: Line, p: Plane) -> Point:
         t = -b/a
         print('parameter: {}'.format(t))
         return l.point(t)
-
-
-'''
-l = Line.createNew(-10,-10,-10,1,2,3)
-p = Plane.createNew(1,4,67,1,2,2,-1,2,1)
-pip = intersect(l, p)
-print("Intersect siger at {} ligger i planen.".format(pip))
-print(distancePointPlane(pip, p))
-print(p.isInPlane(pip))
-'''
-print(Plane.createNew.__doc__)
-p1 = Point(2,3,-1)
-v1 = Vector.fromPoint(p1)
-v1 = Vector.connect(3,2,1,5,3,-1)
-print(v1.length())
-
-v2 = Vector.fromPoint(Point(4,1,1))
-print(dot(v1,v2))
